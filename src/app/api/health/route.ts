@@ -4,7 +4,7 @@ import db from '@/lib/database';
 export async function GET(request: NextRequest) {
   try {
     // Check database connection
-    const dbCheck = db.prepare('SELECT 1 as check').get();
+    const dbCheck = db.prepare('SELECT 1 as healthcheck').get();
     
     return NextResponse.json({
       status: 'healthy',

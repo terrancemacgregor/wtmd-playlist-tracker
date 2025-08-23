@@ -2,6 +2,10 @@
 
 A Next.js application for tracking and analyzing WTMD 89.7 FM playlist data with real-time updates, DJ statistics, and music analytics. Features the official WTMD color scheme and responsive design.
 
+**Listen to WTMD Online**: [https://www.wtmd.org/radio/listen/](https://www.wtmd.org/radio/listen/)
+
+WTMD is a public radio station broadcasting from Towson University in Baltimore, Maryland, featuring an eclectic mix of music programming.
+
 ## Features
 
 - **Real-time Playlist Tracking**: Automatically fetches and stores playlist data every 5 minutes

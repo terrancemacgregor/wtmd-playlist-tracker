@@ -8,13 +8,13 @@ WTMD is a public radio station broadcasting from Towson University in Baltimore,
 
 ## Features
 
-- **Real-time Playlist Tracking**: Automatically fetches and stores playlist data every 5 minutes
+- **Playlist Tracking Infrastructure**: Ready to automatically fetch and store playlist data when available
 - **DJ Analytics**: Track what each DJ plays, their favorite artists, and play patterns
 - **Music Statistics**: View top songs, hourly activity patterns, and daily trends
 - **RESTful API**: Full API access to all playlist data
 - **WTMD-styled Interface**: Matches the official WTMD website design with teal (#02383b) and orange (#f8951d) color scheme
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Sample Data**: Includes seed data for demonstration purposes
+- **Data Ready**: Database and scraping infrastructure ready for when WTMD provides playlist data
 
 ## Tech Stack
 
@@ -37,14 +37,7 @@ cd wtmd-tracker
 npm install
 ```
 
-3. Initialize the database with sample data:
-```bash
-# For demo data (recommended for first run)
-curl -X POST http://localhost:3000/api/seed
-
-# Or fetch real playlist data
-npm run sync
-```
+3. The app is ready to track playlist data when WTMD provides it.
 
 ## Running the Application
 
@@ -170,12 +163,12 @@ wtmd-tracker/
 
 ## Development Notes
 
-- The scraper fetches data from WTMD's playlist page
-- DJ assignments are estimated based on typical show schedules
+- **Data Availability**: WTMD does not currently provide a public API or accessible playlist data
+- The application infrastructure is fully built and ready to track playlists when data becomes available
 - Database uses SQLite for simplicity and portability
-- All times are stored in UTC and converted for display
-- Sample data includes 30+ classic rock and alternative songs
+- All times are stored in UTC and displayed in Eastern Time
 - The application auto-refreshes data every minute in the browser
+- DJ assignments would be based on show schedules when real data is available
 
 ## Troubleshooting
 

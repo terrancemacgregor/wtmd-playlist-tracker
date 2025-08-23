@@ -114,7 +114,7 @@ export default function Home() {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-wtmd-teal">Recently Played</h2>
             <span className="text-xs text-gray-500">
-              {songs.length > 0 && songs[0].id > 30 ? 'Live Data' : 'Demo Data - Click "Sync Now" for live playlist'}
+              {songs.length > 0 ? `${songs.length} songs tracked` : 'No playlist data available'}
             </span>
           </div>
           {loading && songs.length === 0 ? (
@@ -125,8 +125,12 @@ export default function Home() {
           ) : songs.length > 0 ? (
             <PlaylistTable songs={songs} />
           ) : (
-            <div className="text-center py-8 text-gray-600">
-              No songs found. Click "Sync Now" to fetch the latest playlist.
+            <div className="text-center py-8">
+              <div className="text-gray-600 mb-4">
+                <p className="font-semibold">No playlist data available</p>
+                <p className="text-sm mt-2">WTMD does not currently provide a public API for real-time playlist data.</p>
+                <p className="text-sm mt-1">This app is ready to track playlists when data becomes available.</p>
+              </div>
             </div>
           )}
         </div>

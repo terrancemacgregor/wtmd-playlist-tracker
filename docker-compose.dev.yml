@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  wtmd-tracker-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_PATH=/app/data/wtmd.db
+    volumes:
+      # Mount source code for hot reload
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./next.config.js:/app/next.config.js
+      - ./tailwind.config.js:/app/tailwind.config.js
+      - ./tsconfig.json:/app/tsconfig.json
+      # Persist database
+      - wtmd-data-dev:/app/data
+      # Prevent node_modules from being overwritten
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+    command: npm run dev
+
+volumes:
+  wtmd-data-dev:
+    driver: local

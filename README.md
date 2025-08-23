@@ -41,19 +41,44 @@ npm install
 
 ## Running the Application
 
-### Development Mode
+### Option 1: Docker (Recommended)
+
+#### Production with Docker Compose
+```bash
+# Build and run in production mode
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop the application
+docker-compose down
+```
+
+#### Development with Docker Compose
+```bash
+# Run with hot reload for development
+docker-compose -f docker-compose.dev.yml up
+
+# Rebuild after dependency changes
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+### Option 2: Local Node.js
+
+#### Development Mode
 ```bash
 npm run dev
 ```
 Visit http://localhost:3000
 
-### Production Mode
+#### Production Mode
 ```bash
 npm run build
 npm run start
 ```
 
-### Run Scheduler (for automatic updates every 5 minutes)
+#### Run Scheduler (for automatic updates every 5 minutes)
 ```bash
 # In a separate terminal
 npm run scheduler

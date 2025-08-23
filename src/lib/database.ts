@@ -1,7 +1,8 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 
-const db = new Database(path.join(process.cwd(), 'wtmd.db'));
+const dbPath = process.env.DATABASE_PATH || path.join(process.cwd(), 'wtmd.db');
+const db = new Database(dbPath);
 
 export function initDatabase() {
   db.exec(`

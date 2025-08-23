@@ -21,7 +21,8 @@ export default function PlaylistTable({ songs, showDJ = true }: PlaylistTablePro
     return date.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
+      timeZone: 'America/New_York' // WTMD is in Baltimore, MD (Eastern Time)
     });
   };
 
@@ -29,7 +30,8 @@ export default function PlaylistTable({ songs, showDJ = true }: PlaylistTablePro
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
-      day: 'numeric' 
+      day: 'numeric',
+      timeZone: 'America/New_York'
     });
   };
 
@@ -38,7 +40,7 @@ export default function PlaylistTable({ songs, showDJ = true }: PlaylistTablePro
       <table className="min-w-full bg-white">
         <thead className="bg-wtmd-teal text-white">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Time</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Played At (ET)</th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Artist</th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Title</th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell">Album</th>

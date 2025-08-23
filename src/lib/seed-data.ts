@@ -41,8 +41,9 @@ export function seedDatabase() {
   
   sampleSongs.forEach((song, index) => {
     const playedAt = new Date(now);
-    playedAt.setDate(playedAt.getDate() - Math.floor(index / 10));
-    playedAt.setHours(song.hour, Math.floor(Math.random() * 60), 0, 0);
+    // Distribute songs over the last 24 hours instead of future dates
+    playedAt.setHours(playedAt.getHours() - Math.floor(index * 0.8)); // Go back about 45 minutes per song
+    playedAt.setMinutes(Math.floor(Math.random() * 60), 0, 0);
     
     try {
       const result = insertSong({

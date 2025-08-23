@@ -111,7 +111,12 @@ export default function Home() {
         </div>
         
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-wtmd-teal mb-4">Recently Played</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-wtmd-teal">Recently Played</h2>
+            <span className="text-xs text-gray-500">
+              {songs.length > 0 && songs[0].id > 30 ? 'Live Data' : 'Demo Data - Click "Sync Now" for live playlist'}
+            </span>
+          </div>
           {loading && songs.length === 0 ? (
             <div className="text-center py-8">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-wtmd-orange"></div>

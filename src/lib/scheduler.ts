@@ -1,4 +1,4 @@
-import cron from 'node-cron';
+import * as cron from 'node-cron';
 import { fetchAndStoreSongs } from './scraper';
 import { initDatabase } from './database';
 

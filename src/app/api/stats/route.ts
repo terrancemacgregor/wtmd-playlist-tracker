@@ -12,10 +12,10 @@ export async function GET(request: NextRequest) {
     
     switch (type) {
       case 'overview':
-        const totalSongs = db.prepare('SELECT COUNT(*) as count FROM songs').get();
-        const uniqueArtists = db.prepare('SELECT COUNT(DISTINCT artist) as count FROM songs').get();
-        const totalDJs = db.prepare('SELECT COUNT(DISTINCT dj_name) as count FROM songs WHERE dj_name IS NOT NULL').get();
-        const lastUpdate = db.prepare('SELECT MAX(created_at) as last_update FROM songs').get();
+        const totalSongs = db.prepare('SELECT COUNT(*) as count FROM songs').get() as { count: number };
+        const uniqueArtists = db.prepare('SELECT COUNT(DISTINCT artist) as count FROM songs').get() as { count: number };
+        const totalDJs = db.prepare('SELECT COUNT(DISTINCT dj_name) as count FROM songs WHERE dj_name IS NOT NULL').get() as { count: number };
+        const lastUpdate = db.prepare('SELECT MAX(created_at) as last_update FROM songs').get() as { last_update: string | null };
         
         data = {
           totalSongs: totalSongs.count,

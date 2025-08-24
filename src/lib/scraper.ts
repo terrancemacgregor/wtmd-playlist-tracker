@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { insertSong, Song } from './database';
 
-const PLAYLIST_URL = 'https://wtmdradio.org/playlist/dynamic/RecentSongs.html';
+const PLAYLIST_URL = 'https://onlineradiobox.com/us/wtmd/playlist/';
 
 interface ParsedSong {
   date: string;
@@ -49,67 +49,51 @@ export async function scrapePlaylist(): Promise<ParsedSong[]> {
 
     const $ = cheerio.load(response.data);
     const songs: ParsedSong[] = [];
-    const currentYear = new Date().getFullYear();
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth() + 1;
+    const currentDay = today.getDate();
+    const dateStr = `${String(currentMonth).padStart(2, '0')}/${String(currentDay).padStart(2, '0')}`;
     
-    const text = $('body').text();
-    const lines = text.split('\n').filter(line => line.trim());
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+    // OnlineRadioBox uses a table with class tablelist-schedule
+    $('table.tablelist-schedule tbody tr').each((index, element) => {
+      const $row = $(element);
+      const $timeCell = $row.find('td.tablelist-schedule__time');
+      const $trackCell = $row.find('td.track_history_item');
       
-      // Try different parsing patterns
-      // Pattern 1: "MM/DD HH:MM Title / Artist / Album"
-      let match = line.match(/^(\d{2}\/\d{2})\s+(\d{1,2}:\d{2})\s+(.+?)\s+\/\s+(.+?)(?:\s+\/\s+(.+))?$/);
-      
-      // Pattern 2: "MM/DD HH:MM Artist / Title"
-      if (!match) {
-        match = line.match(/^(\d{2}\/\d{2})\s+(\d{1,2}:\d{2})\s+(.+?)\s+\/\s+(.+?)$/);
-        if (match) {
-          // Swap artist and title for this pattern
-          const [_, date, time, artist, title] = match;
-          match = [_, date, time, title, artist];
+      if ($timeCell.length && $trackCell.length) {
+        const timeText = $timeCell.find('.time--schedule').text().trim();
+        const $trackLink = $trackCell.find('a');
+        
+        // Skip entries that are just "Total Music Discovery - WTMD" or show names
+        const trackText = $trackCell.text().trim();
+        if (trackText.includes('Total Music Discovery') || 
+            trackText.includes('with ') ||
+            !$trackLink.length) {
+          return; // Skip this row
+        }
+        
+        // Extract song info from the link text (format: "Artist - Title")
+        const fullText = $trackLink.text().trim();
+        const parts = fullText.split(' - ');
+        
+        if (parts.length >= 2 && timeText) {
+          const artist = parts[0].trim();
+          const title = parts.slice(1).join(' - ').trim(); // Handle cases with multiple dashes
+          const [hour, minute] = timeText.split(':').map(s => parseInt(s));
+          const djInfo = getCurrentDJ(hour);
+          
+          songs.push({
+            date: dateStr,
+            time: timeText,
+            title: title,
+            artist: artist,
+            album: undefined,
+            dj: djInfo.dj
+          });
         }
       }
-      
-      // Pattern 3: Lines with date/time followed by artist on next line
-      if (!match && line.match(/^\d{2}\/\d{2}\s+\d{1,2}:\d{2}$/)) {
-        const dateTime = line;
-        const nextLine = i + 1 < lines.length ? lines[i + 1].trim() : '';
-        if (nextLine) {
-          const [date, time] = dateTime.split(/\s+/);
-          const parts = nextLine.split(/\s+\/\s+/);
-          if (parts.length >= 2) {
-            match = ['', date, time, parts[1], parts[0], parts[2]];
-            i++; // Skip the next line since we've used it
-          }
-        }
-      }
-      
-      if (match) {
-        const [_, date, time, title, artist, album] = match;
-        const [month, day] = date.split('/');
-        const [hour, minute] = time.split(':');
-        
-        const playedAt = new Date(
-          currentYear,
-          parseInt(month) - 1,
-          parseInt(day),
-          parseInt(hour),
-          parseInt(minute)
-        );
-        
-        const djInfo = getCurrentDJ(parseInt(hour));
-        
-        songs.push({
-          date,
-          time,
-          title: (title || '').trim(),
-          artist: (artist || '').trim(),
-          album: album?.trim(),
-          dj: djInfo.dj
-        });
-      }
-    }
+    });
     
     console.log(`Parsed ${songs.length} songs from playlist`);
     return songs;

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p ${PORT:-3000}",
     "sync": "node -e \"require('./src/lib/scraper').fetchAndStoreSongs().then(console.log).catch(console.error)\"",
     "scheduler": "node -e \"require('./src/lib/scheduler').startScheduler(); setInterval(() => {}, 1000)\"",
     "docker:build": "docker-compose build",

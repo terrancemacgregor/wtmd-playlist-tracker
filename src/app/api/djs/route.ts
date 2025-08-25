@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDJs, getSongs, initDatabase } from '@/lib/db';
+import type { Song } from '@/lib/db';
 
 initDatabase();
 
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (djName) {
       // Get songs by specific DJ
       const allSongs = getSongs(1000); // Get more songs to filter
-      const djSongs = allSongs.filter(song => song.dj_name === djName);
+      const djSongs = allSongs.filter((song: Song) => song.dj_name === djName);
       
       return NextResponse.json({
         success: true,

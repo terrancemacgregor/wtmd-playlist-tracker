@@ -20,5 +20,16 @@ export const {
   searchSongs
 } = db;
 
-export type { Song } from './database';
+// Export Song type
+export interface Song {
+  id?: number;
+  artist: string;
+  title: string;
+  album?: string | null;
+  played_at: string;
+  dj_name?: string | null;
+  show_name?: string | null;
+  created_at?: string;
+}
+
 export default db.default;

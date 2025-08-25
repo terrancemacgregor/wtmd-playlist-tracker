@@ -1,6 +1,6 @@
 import * as cron from 'node-cron';
 import { fetchAndStoreSongs } from './scraper';
-import { initDatabase } from './database';
+import { initDatabase } from './db';
 
 let cronJob: cron.ScheduledTask | null = null;
 

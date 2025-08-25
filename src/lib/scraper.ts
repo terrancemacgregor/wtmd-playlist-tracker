@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { insertSong, Song } from './database';
+import { insertSong } from './db';
+import type { Song } from './database';
 
 const PLAYLIST_URL = 'https://onlineradiobox.com/us/wtmd/playlist/';
 

@@ -9,6 +9,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
   const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   const fetchSongs = async () => {
     try {
@@ -36,16 +37,29 @@ export default function Home() {
 
   const syncPlaylist = async () => {
     setLoading(true);
+    setSyncMessage(null);
     try {
       const response = await fetch('/api/sync', { method: 'POST' });
       const data = await response.json();
       if (data.success) {
         setLastSync(new Date());
+        const message = data.new > 0 
+          ? `Sync complete! Added ${data.new} new songs (${data.total} total found)`
+          : `Sync complete! No new songs found (${data.total} songs already tracked)`;
+        setSyncMessage(message);
         await fetchSongs();
         await fetchStats();
+        
+        // Clear message after 5 seconds
+        setTimeout(() => setSyncMessage(null), 5000);
+      } else {
+        setSyncMessage(`Sync failed: ${data.message || 'Unknown error'}`);
+        setTimeout(() => setSyncMessage(null), 5000);
       }
     } catch (error) {
       console.error('Error syncing playlist:', error);
+      setSyncMessage('Sync failed: Network error');
+      setTimeout(() => setSyncMessage(null), 5000);
     } finally {
       setLoading(false);
     }
@@ -76,14 +90,33 @@ export default function Home() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-4">
               <h1 className="text-3xl font-bold text-wtmd-teal">Live Playlist</h1>
-              <button
-                onClick={syncPlaylist}
-                disabled={loading}
-                className="bg-wtmd-orange hover:bg-orange-600 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50"
-              >
-                {loading ? 'Syncing...' : 'Sync Now'}
-              </button>
+              <div className="flex items-center gap-3">
+                <a 
+                  href="https://www.wtmd.org/radio/listen/#ways-to-stream"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-wtmd-teal hover:bg-teal-700 text-white px-4 py-2 rounded-md font-medium flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+                  </svg>
+                  Listen Live
+                </a>
+                <button
+                  onClick={syncPlaylist}
+                  disabled={loading}
+                  className="bg-wtmd-orange hover:bg-orange-600 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                >
+                  {loading ? 'Syncing...' : 'Sync Now'}
+                </button>
+              </div>
             </div>
+            
+            {syncMessage && (
+              <div className={`mt-4 p-3 rounded-md ${syncMessage.includes('failed') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                {syncMessage}
+              </div>
+            )}
             
             {stats && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">

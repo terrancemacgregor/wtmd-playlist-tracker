@@ -11,7 +11,7 @@ export default function AboutPage() {
         {/* Listen Now Banner */}
         <div className="bg-wtmd-orange text-white rounded-lg shadow-lg p-6 mb-8 text-center">
           <a 
-            href="https://www.wtmd.org/listen"
+            href="https://www.wtmd.org/radio/listen/#ways-to-stream"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center text-2xl font-bold hover:underline"
@@ -22,6 +22,7 @@ export default function AboutPage() {
             Listen to WTMD Now
           </a>
           <p className="mt-2 text-sm">Stream live 24/7 - Baltimore's music discovery station</p>
+          <p className="mt-1 text-xs">Multiple streaming options available</p>
         </div>
 
         {/* About Section */}

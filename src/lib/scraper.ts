@@ -55,31 +55,48 @@ export async function scrapePlaylist(): Promise<ParsedSong[]> {
     const currentDay = today.getDate();
     const dateStr = `${String(currentMonth).padStart(2, '0')}/${String(currentDay).padStart(2, '0')}`;
     
-    // OnlineRadioBox uses a table with class tablelist-schedule
-    $('table.tablelist-schedule tbody tr').each((index, element) => {
-      const $row = $(element);
-      const $timeCell = $row.find('td.tablelist-schedule__time');
-      const $trackCell = $row.find('td.track_history_item');
-      
-      if ($timeCell.length && $trackCell.length) {
-        const timeText = $timeCell.find('.time--schedule').text().trim();
-        const $trackLink = $trackCell.find('a');
+    console.log('Looking for playlist table...');
+    
+    // Try multiple selectors for OnlineRadioBox
+    const selectors = [
+      'table.tablelist-schedule tbody tr',
+      'table.table-striped tbody tr',
+      '.playlist-tracks tr',
+      'table tbody tr'
+    ];
+    
+    let rowsFound = false;
+    for (const selector of selectors) {
+      const rows = $(selector);
+      if (rows.length > 0) {
+        console.log(`Found ${rows.length} rows using selector: ${selector}`);
+        rowsFound = true;
         
-        // Skip entries that are just "Total Music Discovery - WTMD" or show names
-        const trackText = $trackCell.text().trim();
-        if (trackText.includes('Total Music Discovery') || 
-            trackText.includes('with ') ||
-            !$trackLink.length) {
-          return; // Skip this row
-        }
-        
-        // Extract song info from the link text (format: "Artist - Title")
-        const fullText = $trackLink.text().trim();
-        const parts = fullText.split(' - ');
-        
-        if (parts.length >= 2 && timeText) {
-          const artist = parts[0].trim();
-          const title = parts.slice(1).join(' - ').trim(); // Handle cases with multiple dashes
+        rows.each((index, element) => {
+          const $row = $(element);
+          const rowText = $row.text();
+          
+          // Look for time patterns (HH:MM)
+          const timeMatch = rowText.match(/(\d{1,2}:\d{2})/);
+          if (!timeMatch) return;
+          
+          const timeText = timeMatch[1];
+          
+          // Look for artist - title pattern
+          const songMatch = rowText.match(/([^-]+)\s*-\s*([^-]+)/);
+          if (!songMatch) return;
+          
+          const artist = songMatch[1].trim();
+          const title = songMatch[2].trim();
+          
+          // Skip if it looks like a show name or station ID
+          if (artist.toLowerCase().includes('wtmd') || 
+              artist.toLowerCase().includes('total music') ||
+              title.toLowerCase().includes('wtmd') ||
+              artist.includes('with ')) {
+            return;
+          }
+          
           const [hour, minute] = timeText.split(':').map(s => parseInt(s));
           const djInfo = getCurrentDJ(hour);
           
@@ -91,9 +108,17 @@ export async function scrapePlaylist(): Promise<ParsedSong[]> {
             album: undefined,
             dj: djInfo.dj
           });
-        }
+        });
+        
+        if (songs.length > 0) break;
       }
-    });
+    }
+    
+    if (!rowsFound) {
+      console.log('No playlist table found on page');
+      console.log('Page title:', $('title').text());
+      console.log('Tables found:', $('table').length);
+    }
     
     console.log(`Parsed ${songs.length} songs from playlist`);
     return songs;
@@ -107,39 +132,81 @@ export async function fetchAndStoreSongs() {
   try {
     const songs = await scrapePlaylist();
     let newSongs = 0;
+    let skippedSongs = 0;
     
     for (const song of songs) {
-      const [month, day] = song.date.split('/');
-      const [hour, minute] = song.time.split(':');
-      const currentYear = new Date().getFullYear();
-      
-      const playedAt = new Date(
-        currentYear,
-        parseInt(month) - 1,
-        parseInt(day),
-        parseInt(hour),
-        parseInt(minute)
-      );
-      
-      const djInfo = getCurrentDJ(parseInt(hour));
-      
-      const songData: Song = {
-        artist: song.artist,
-        title: song.title,
-        album: song.album,
-        played_at: playedAt.toISOString(),
-        dj_name: djInfo.dj,
-        show_name: djInfo.show
-      };
-      
-      const result = insertSong(songData);
-      if (result.changes > 0) {
-        newSongs++;
+      try {
+        // Validate required fields
+        if (!song.date || !song.time || !song.artist || !song.title) {
+          console.log('Skipping song with missing data:', song);
+          skippedSongs++;
+          continue;
+        }
+        
+        const dateParts = song.date.split('/');
+        const timeParts = song.time.split(':');
+        
+        // Validate date and time parts
+        if (dateParts.length < 2 || timeParts.length < 2) {
+          console.log('Invalid date/time format:', song.date, song.time);
+          skippedSongs++;
+          continue;
+        }
+        
+        const [month, day] = dateParts;
+        const [hour, minute] = timeParts;
+        const currentYear = new Date().getFullYear();
+        
+        // Parse and validate numbers
+        const monthNum = parseInt(month);
+        const dayNum = parseInt(day);
+        const hourNum = parseInt(hour);
+        const minuteNum = parseInt(minute);
+        
+        if (isNaN(monthNum) || isNaN(dayNum) || isNaN(hourNum) || isNaN(minuteNum)) {
+          console.log('Invalid numeric values in date/time:', song.date, song.time);
+          skippedSongs++;
+          continue;
+        }
+        
+        const playedAt = new Date(
+          currentYear,
+          monthNum - 1,
+          dayNum,
+          hourNum,
+          minuteNum
+        );
+        
+        // Check if date is valid
+        if (isNaN(playedAt.getTime())) {
+          console.log('Invalid date created:', song.date, song.time);
+          skippedSongs++;
+          continue;
+        }
+        
+        const djInfo = getCurrentDJ(hourNum);
+        
+        const songData: Song = {
+          artist: song.artist,
+          title: song.title,
+          album: song.album,
+          played_at: playedAt.toISOString(),
+          dj_name: djInfo.dj,
+          show_name: djInfo.show
+        };
+        
+        const result = insertSong(songData);
+        if (result.changes > 0) {
+          newSongs++;
+        }
+      } catch (songError) {
+        console.error('Error processing individual song:', song, songError);
+        skippedSongs++;
       }
     }
     
-    console.log(`Stored ${newSongs} new songs in database`);
-    return { total: songs.length, new: newSongs };
+    console.log(`Stored ${newSongs} new songs, skipped ${skippedSongs} invalid entries`);
+    return { total: songs.length, new: newSongs, skipped: skippedSongs };
   } catch (error) {
     console.error('Error fetching and storing songs:', error);
     throw error;

@@ -22,6 +22,9 @@ export default function Header() {
               <Link href="/" className="hover:bg-wtmd-light-teal px-3 py-2 rounded-md text-sm font-medium">
                 Live Playlist
               </Link>
+              <Link href="/about" className="hover:bg-wtmd-light-teal px-3 py-2 rounded-md text-sm font-medium">
+                About
+              </Link>
               <Link href="/djs" className="hover:bg-wtmd-light-teal px-3 py-2 rounded-md text-sm font-medium">
                 DJs
               </Link>
@@ -52,6 +55,9 @@ export default function Header() {
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <Link href="/" className="block hover:bg-wtmd-light-teal px-3 py-2 rounded-md text-base font-medium">
                 Live Playlist
+              </Link>
+              <Link href="/about" className="block hover:bg-wtmd-light-teal px-3 py-2 rounded-md text-base font-medium">
+                About
               </Link>
               <Link href="/djs" className="block hover:bg-wtmd-light-teal px-3 py-2 rounded-md text-base font-medium">
                 DJs

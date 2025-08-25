@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRecentSongs, getTopSongs, initDatabase } from '@/lib/database';
+import { getRecentSongs, getTopSongs, initDatabase } from '@/lib/db';
 
 initDatabase();
 

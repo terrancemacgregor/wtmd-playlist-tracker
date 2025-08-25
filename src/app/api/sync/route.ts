@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchAndStoreSongs } from '@/lib/scraper';
-import { initDatabase } from '@/lib/database';
+import { initDatabase } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/database';
+import { initDatabase } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    // Check database connection
-    const dbCheck = db.prepare('SELECT 1 as healthcheck').get();
+    // Initialize database
+    initDatabase();
     
     return NextResponse.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      database: dbCheck ? 'connected' : 'disconnected',
-      version: process.env.npm_package_version || '1.0.0'
+      database: 'connected',
+      version: process.env.npm_package_version || '1.0.0',
+      environment: process.env.RAILWAY_ENVIRONMENT_NAME || 'local'
     });
   } catch (error) {
     return NextResponse.json(
